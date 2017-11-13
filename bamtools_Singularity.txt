@@ -1,0 +1,37 @@
+#graphmap in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    /bamtools/bin/bamtools "$@"
+
+%post
+    apt-get --assume-yes install wget
+    apt-get --assume-yes install sudo
+
+    sudo apt-get update
+    sudo apt-get -y install build-essential
+    sudo apt-get -y install zlib1g
+    sudo apt-get -y install cmake
+    sudo apt-get update
+
+    sudo apt-get -y install git-core   
+  sudo apt-get -y install zlib1g-dev     
+    
+    cd /
+    git clone git://github.com/pezmaster31/bamtools.git
+    cd bamtools
+    mkdir build
+    cd build
+    cmake ..
+    make
+    
+    sudo mkdir /groups
+    sudo mkdir /scratch
+    sudo mkdir /scratch-ii2
+    sudo mkdir /clustertmp
+
+%test
+    /bamtools/bin/bamtools -h

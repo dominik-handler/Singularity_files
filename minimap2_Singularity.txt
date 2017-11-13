@@ -1,0 +1,33 @@
+#minimap2 in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    /minimap2/minimap2 "$@"
+
+%post
+    apt-get --assume-yes install wget
+    apt-get --assume-yes install sudo
+
+    sudo apt-get update
+    sudo apt-get -y install build-essential
+    sudo apt-get -y install zlib1g
+    sudo apt-get -y install cmake
+    sudo apt-get update
+    sudo apt-get -y install git-core   
+    sudo apt-get -y install zlib1g-dev 
+    sudo apt-get -y install man-db    
+    
+    cd /
+    git clone https://github.com/lh3/minimap2
+    cd minimap2 && make
+     
+    sudo mkdir /groups
+    sudo mkdir /clustertmp
+    sudo mkdir /scratch
+
+%test
+    /minimap2/minimap2 -h
+    

@@ -1,0 +1,38 @@
+#graphmap in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    bedtools "$@"
+
+%post
+    apt-get --assume-yes install wget
+    apt-get --assume-yes install sudo
+
+    sudo apt-get update
+    sudo apt-get -y install build-essential
+    sudo apt-get -y install zlib1g
+    sudo apt-get -y install cmake
+    sudo apt-get update
+
+    sudo apt-get -y install git-core   
+    sudo apt-get -y install zlib1g-dev     
+    
+    sudo apt-get -y install python
+       
+    cd /
+    wget https://github.com/arq5x/bedtools2/releases/download/v2.26.0/bedtools-2.26.0.tar.gz
+    tar -zxvf bedtools-2.26.0.tar.gz
+    cd bedtools2
+    make    
+    cp -r ./bin/* /usr/local/bin/
+    
+    sudo mkdir /groups
+    sudo mkdir /scratch
+    sudo mkdir /scratch-ii2
+    sudo mkdir /clustertmp
+
+%test
+    bedtools -h

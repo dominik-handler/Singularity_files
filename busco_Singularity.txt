@@ -1,0 +1,63 @@
+#albacore in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+python3 /busco/scripts/run_BUSCO.py "$@"
+
+%post
+ apt-get update 
+ apt-get install -y wget zlib1g-dev sudo software-properties-common
+ 
+ sudo add-apt-repository universe
+ sudo apt-get update
+ sudo apt-get install -y libboost-iostreams-dev libsqlite3-dev libboost-graph-dev liblpsolve55-dev cmake gcc git build-essential 
+ sudo apt-get -y install python3.5
+ sudo apt-get -y install python3-setuptools
+ sudo easy_install3 pip
+
+
+ cd /root && wget -O- https://github.com/pezmaster31/bamtools/archive/v2.4.0.tar.gz | tar zx && \
+ cd bamtools* && mkdir build && cd build && cmake .. && make && make install && \
+ cp /usr/local/bin/* /usr/bin/ && \
+ cp -r /usr/local/include/bamtools /usr/include/ && \
+ cp -r /usr/local/lib/bamtools /usr/lib/ && \
+ cp -r /usr/include/bamtools/* /usr/include/ && \
+ cp -r /usr/lib/bamtools/libbamtools.* /usr/lib/
+
+# install augustus
+ cd /root && wget -O- http://bioinf.uni-greifswald.de/augustus/binaries/augustus.current.tar.gz | tar zx && \
+ cd augustus/ && make && make install
+ cp -r /root/augustus/scripts/* /usr/bin/
+
+# install hmmer
+ cd  && wget -O- http://eddylab.org/software/hmmer3/3.1b2/hmmer-3.1b2-linux-intel-x86_64.tar.gz | tar zx && \
+ cd hmmer-3.1b2-linux-intel-x86_64/ && ./configure && make && make install
+
+# install ncbi blast
+ cd /root && wget -O- https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.6.0+-x64-linux.tar.gz | tar zx  && \
+ cp ncbi-blast*/bin/* /usr/bin/
+
+# install busco
+ cd / && git clone http://gitlab.com/ezlab/busco && cd busco/ && sudo python3 setup.py install
+
+# download DipteraDB
+# wget -O-  http://busco.ezlab.org/datasets/diptera_odb9.star.gz | tar zx
+  cd config
+  cat config.ini.default | \
+    awk '{if($1=="path" && $NF~"osboxes" && $NF~"/scripts/") $NF="/opt/augustus-3.3/scripts/"; else {if($1=="path" && $NF~"osboxes") $NF="/usr/local/bin/";} print }' > config.ini
+
+  sudo echo 'export PATH="/opt/augustus-3.3/bin:$PATH"' >> ~/.profile
+  sudo echo 'export PATH="/opt/augustus-3.3/script:$PATH"' >> ~/.profile
+  sudo echo 'export AUGUSTUS_CONFIG_PATH="/opt/augustus-3.3/config/"' >> ~/.profile
+
+  sudo mkdir /groups
+  sudo mkdir /scratch
+  sudo mkdir /clustertmp
+
+%test
+
+python3 /busco/scripts/run_BUSCO.py  
+

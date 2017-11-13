@@ -1,0 +1,35 @@
+#nanopolish in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    /nanopolish/nanopolish "$@"
+
+%post
+    apt-get -y install wget
+    apt-get -y install sudo
+
+    sudo apt-get update
+    sudo apt-get -y install build-essential
+    sudo apt-get -y install zlib1g
+    sudo apt-get install zlib1g-dev
+    sudo apt-get -y install git-core  
+
+    sudo apt-get -y install python3.5
+    sudo apt-get -y install python3-setuptools
+    sudo easy_install3 pip
+    sudo pip install biopython
+
+    cd /
+    git clone --recursive https://github.com/jts/nanopolish.git
+    cd nanopolish
+    make
+
+    sudo mkdir /groups
+    sudo mkdir /clustertmp
+
+%test
+    /nanopolish/nanopolish 
+    

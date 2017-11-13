@@ -1,0 +1,35 @@
+	#graphmap in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    /graphmap/bin/*/graphmap "$@"
+
+%post
+    apt-get --assume-yes install wget
+    apt-get --assume-yes install sudo
+
+    sudo apt-get update
+    sudo apt-get -y install build-essential
+    sudo apt-get -y install zlib1g
+    sudo apt-get -y install cmake
+    sudo apt-get update
+
+    sudo apt-get -y install git-core   
+    sudo apt-get -y install zlib1g-dev     
+    
+    cd /
+    git clone https://github.com/isovic/graphmap.git  
+    cd graphmap  
+    make modules  
+    make  
+    
+    
+    sudo mkdir /groups
+    sudo mkdir /clustertmp
+
+%test
+  #
+  /graphmap/bin/*/graphmap align 

@@ -1,0 +1,30 @@
+#graphmap in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    gnuplot "$@"
+
+%post
+    apt-get --assume-yes install wget
+    apt-get --assume-yes install sudo
+
+    sudo apt-get update
+      
+    sudo apt-get -y install software-properties-common
+    sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
+    sudo apt-get update
+    
+    sudo apt-get -y install gnuplot gnuplot-x11 gnuplot-doc 
+    sudo apt-get -y install xfig transfig xfig-libs
+           
+
+    sudo mkdir /groups
+    sudo mkdir /scratch
+    sudo mkdir /scratch-ii2
+    sudo mkdir /clustertmp
+
+%test
+  gnuplot --version

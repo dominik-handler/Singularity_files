@@ -1,0 +1,56 @@
+#albacore in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    #export PYTHONPATH=/minUP/:/minUP/modules/:$PYTHONPATH
+    X=$(echo $RANDOM)
+    mkdir /tmp/minUP_${X}/
+    cp -r /minUP/* /tmp/minUP_${X}/
+    cd /tmp/minUP_${X}/
+    python /tmp/minUP_${X}/ "$@"
+    rm -rf /tmp/minUP_${X}/
+
+%post
+    
+    apt-get --assume-yes install wget
+    apt-get --assume-yes install sudo
+
+    HOSTNAME=$(hostname)
+    mkdir -p /tmp/
+    cp /etc/hosts /tmp/hosts.new
+    sed -i "s/127.0.0.1 localhost/127.0.0.1 localhost $HOSTNAME/" /tmp/hosts.new
+    sudo cp -f /tmp/hosts.new /etc/hosts
+
+    sudo apt-get update
+    sudo apt-get --assume-yes install software-properties-common
+    sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu xenial main universe" 
+
+    sudo apt-get update
+    sudo apt-get --assume-yes install git python python-setuptools python-dev build-essential libmysqlclient-dev
+   
+    sudo apt-get update
+    sudo apt-get --assume-yes install python-wxtools python-wxgtk3.0
+
+    sudo easy_install pip
+
+    sudo pip install watchdog MySQL-Python configargparse psutil BioPython numpy progressbar ws4py thrift dictdiffer twisted autobahn gooey h5py xmltodict python-dateutil
+
+    cd /
+    git clone https://gitlab.com/dominik-handler/minUP.git
+    export PYTHONPATH=/minUP/:$PYTHONPATH
+    
+    sudo mkdir /groups
+    sudo mkdir /clustertmp
+
+%test
+    #export PYTHONPATH=/minUP/:/minUP/modules/:$PYTHONPATH
+    X=$(echo $RANDOM)
+    mkdir /tmp/minUP_${X}/
+    cp -r /minUP/* /tmp/minUP_${X}/
+    cd /tmp/minUP_${X}/
+    python /tmp/minUP_${X}/ "$@"
+    rm -rf /tmp/minUP_${X}/
+       

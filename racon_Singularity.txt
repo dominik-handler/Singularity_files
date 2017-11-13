@@ -1,0 +1,41 @@
+#Racon in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    /racon/bin/racon "$@"
+
+%post
+    apt-get -y install wget
+    apt-get -y install sudo
+
+    sudo apt-get update
+    sudo apt-get -y install software-properties-common
+    sudo add-apt-repository universe
+    sudo apt-get update
+
+
+    sudo apt-get update
+    sudo apt-get -y install build-essential
+    sudo apt-get -y install zlib1g-dev
+    sudo apt-get -y install mummer     
+    sudo apt-get -y install python-numpy  
+    sudo apt-get -y install python-matplotlib      
+    sudo apt-get -y install git-core   
+
+    cd /
+    git clone https://github.com/isovic/racon.git 
+    cd racon 
+    make modules 
+    make tools 
+    make -j 2
+
+    
+    sudo mkdir /groups
+    sudo mkdir /scratch
+
+%test
+    /racon/bin/racon -h
+    

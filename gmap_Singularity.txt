@@ -1,0 +1,41 @@
+#Racon in singularity
+
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%runscript
+    gmap "$@"
+
+    
+%post
+    apt-get -y install wget
+    apt-get -y install sudo
+
+    sudo apt-get update
+    sudo apt-get -y install build-essential
+    sudo apt-get -y install zlib1g
+    sudo apt-get -y install cmake
+    sudo apt-get -y install wget
+    sudo apt-get update
+    sudo apt-get -y install perl
+
+    sudo apt-get -y install git-core   
+    sudo apt-get -y install zlib1g-dev   
+
+    mkdir -p /Software/bin
+    cd /Software
+
+    wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2017-09-11.tar.gz
+    tar -zxvf gmap-gsnap-2017-09-11.tar.gz
+    cd gmap-2017-09-11
+    
+    ./configure
+    make
+    make install
+    
+    sudo mkdir /groups
+    sudo mkdir /scratch
+
+%test
+  gmap
